@@ -1,11 +1,7 @@
 #!/usr/bin/php -q
 <?php
 
-#putenv('EC2_HOME=/usr/local/ec2-api-tools');
-#putenv('JAVA_HOME=/usr/java/latest');
-#putenv('TZ=America/Denver');
-
-$options = getopt("S:K:v:");
+$options = getopt("S:K:v:r:");
 if (!isset($options["S"])) { usage(); }
 if (!isset($options["K"])) { usage(); }
 if (!isset($options["v"])) { usage(); }
@@ -13,17 +9,17 @@ if (!isset($options["v"])) { usage(); }
 define('AWS_KEY', $options["K"]);
 define('AWS_SECRET_KEY', $options["S"]);
 
+if (isset($options["r"])) {
+  $region = $options["r"];
+} else {
+  $region = "us-east-1";
+}
+
 error_reporting(-1);
 require_once '/usr/local/aws-php-sdk/sdk.class.php';
 
-$regions = array (
-	'E1' => 'http://monitoring.amazonaws.com/doc/2010-08-01/CloudWatch.wsdl',
-	'W1' => 'http://monitoring.us-west-1.amazonaws.com/doc/2010-08-01/CloudWatch.wsdl',
-	'EU' => 'http://monitoring.eu-west-1.amazonaws.com/doc/2010-08-01/CloudWatch.wsdl',
-	'AP' => 'http://monitoring.ap-southeast-1.amazonaws.com/doc/2010-08-01/CloudWatch.wsdl',
-        );
-
 $ec2 = new AmazonEC2();
+$ec2 = $ec2->set_region($region);
 
 $description = $ec2->describe_volumes(array(
 	'VolumeId' => $options["v"],
